@@ -1,508 +1,496 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Veggie & Co</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#3B6D11" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Veggie & Co" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Veggie & Co — Menus végétariens, sans prise de tête</title>
+  <meta name="description" content="5 ingrédients. Un plat. Une liste de courses prête. Veggie & Co génère vos menus végétariens et fait votre liste à votre place."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green-dark:   #27500A;
-      --green-main:   #3B6D11;
-      --green-light:  #EAF3DE;
-      --green-mid:    #C0DD97;
-      --amber-light:  #FAEEDA;
-      --amber-dark:   #633806;
-      --text-primary: #1a1a1a;
-      --text-muted:   #666;
-      --border:       rgba(0,0,0,0.08);
-      --surface:      #fff;
-      --bg:           #f5f7f2;
-      --radius-md:    10px;
-      --radius-lg:    16px;
+      --green:       #3B6D11;
+      --green-dark:  #27500A;
+      --green-pale:  #EAF3DE;
+      --green-mid:   #C0DD97;
+      --ink:         #1A1F16;
+      --muted:       #5A6352;
+      --amber:       #E8A020;
+      --amber-pale:  #FDF3E0;
+      --bg:          #F7F9F4;
+      --white:       #FFFFFF;
+      --border:      rgba(58,109,17,0.12);
+      --r:           14px;
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
-      color: var(--text-primary);
-      min-height: 100dvh;
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .app { max-width: 430px; margin: 0 auto; padding-bottom: 5rem; }
-
-    /* ── Header ── */
-    .topbar {
-      background: var(--surface);
-      border-bottom: 0.5px solid var(--border);
-      padding: 1.1rem 1rem 0.9rem;
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(247,249,244,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
       display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10;
+      height: 60px;
     }
-    .topbar-title { font-size: 20px; font-weight: 600; color: var(--green-main); }
-    .topbar-sub   { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .nav-logo { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--green); }
+    .nav-cta {
+      background: var(--green); color: #fff;
+      border: none; border-radius: 8px;
+      padding: 8px 18px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; font-family: 'Inter', sans-serif;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--green-dark); }
 
-    /* ── Nav tabs ── */
-    .nav-tabs {
-      display: flex; background: var(--surface);
-      border-bottom: 0.5px solid var(--border);
+    /* ── Hero ── */
+    .hero {
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
     }
-    .nav-tab {
-      flex: 1; padding: 0.75rem 0; font-size: 13px; font-weight: 500;
-      color: var(--text-muted); border: none; background: none; cursor: pointer;
-      border-bottom: 2px solid transparent; transition: all 0.15s;
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-pale); border: 1px solid var(--green-mid);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 13px; font-weight: 600; color: var(--green-dark);
+      margin-bottom: 1.75rem; letter-spacing: 0.02em;
     }
-    .nav-tab.active { color: var(--green-main); border-bottom-color: var(--green-main); }
+    .hero-eyebrow span { width: 7px; height: 7px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
 
-    /* ── Sections ── */
-    .section { display: none; }
-    .section.active { display: block; }
-    .section-label {
-      font-size: 12px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 1.25rem 1rem 0.5rem;
-    }
-
-    /* ── Hero card ── */
-    .hero-card {
-      margin: 0.75rem 1rem 0;
-      background: var(--green-main);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-    }
-    .hero-tag {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: rgba(255,255,255,0.15); border-radius: 20px;
-      padding: 3px 10px; font-size: 12px; color: var(--green-mid); margin-bottom: 8px;
-    }
-    .hero-title { font-size: 19px; font-weight: 600; color: #fff; line-height: 1.3; margin-bottom: 6px; }
-    .hero-desc  { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.5; margin-bottom: 14px; }
-    .ing-row    { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-    .ing-pill   {
-      background: rgba(255,255,255,0.14); border-radius: 20px;
-      padding: 4px 10px; font-size: 12px; color: var(--green-light);
-    }
-    .hero-actions { display: flex; gap: 8px; }
-    .btn-primary {
-      background: #fff; color: var(--green-main); border: none;
-      border-radius: var(--radius-md); padding: 9px 16px;
-      font-size: 13px; font-weight: 600; cursor: pointer; flex: 1;
-    }
-    .btn-icon {
-      background: rgba(255,255,255,0.14); color: #fff; border: none;
-      border-radius: var(--radius-md); padding: 9px 14px; font-size: 16px; cursor: pointer;
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
     }
 
-    /* ── Recette dépliable ── */
-    .recipe-panel {
-      display: none; background: var(--surface);
-      margin: 0 1rem; border-radius: var(--radius-lg);
-      border: 0.5px solid var(--border); padding: 1.1rem;
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
     }
-    .recipe-panel.open { display: block; }
-    .recipe-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
-    .steps { list-style: none; }
-    .steps li {
-      display: flex; gap: 10px; padding: 8px 0;
-      border-bottom: 0.5px solid var(--border);
-      font-size: 13px; line-height: 1.5; color: var(--text-primary);
-    }
-    .steps li:last-child { border-bottom: none; }
-    .step-num {
-      min-width: 22px; height: 22px; border-radius: 50%;
-      background: var(--green-light); color: var(--green-dark);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 600; flex-shrink: 0;
+    .hero h1 em {
+      font-style: italic;
+      color: var(--green);
     }
 
-    /* ── Grille rapide ── */
-    .quick-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; padding: 0.5rem 1rem 0; }
-    .quick-card {
-      background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg); padding: 1rem; cursor: pointer;
+    .hero-rotating {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-style: italic;
+      color: var(--amber);
+      height: 1.2em;
+      overflow: hidden;
+      display: block;
+      margin-bottom: 1.5rem;
     }
-    .quick-icon { font-size: 20px; margin-bottom: 8px; }
-    .quick-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
-    .quick-time { font-size: 11px; font-weight: 600; display: inline-block;
-      background: var(--green-light); color: var(--green-dark);
-      border-radius: 10px; padding: 2px 8px; }
-
-    /* ── Bloc IA ── */
-    .ai-block {
-      margin: 1rem 1rem 0;
-      background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg); padding: 1.25rem;
+    .rotating-inner { animation: rotateWords 6s infinite; display: block; }
+    @keyframes rotateWords {
+      0%,28%  { transform: translateY(0); }
+      33%,61% { transform: translateY(-1.2em); }
+      66%,94% { transform: translateY(-2.4em); }
+      100%    { transform: translateY(0); }
     }
-    .ai-block h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .ai-block p  { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
-    .ai-output   { font-size: 14px; line-height: 1.65; min-height: 48px; margin-bottom: 14px; }
-    .ai-output.loading { color: var(--text-muted); font-style: italic; }
-    .btn-gen {
-      background: var(--green-main); color: #fff; border: none;
-      border-radius: var(--radius-md); padding: 10px 16px;
-      font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;
+    .rotating-inner span { display: block; height: 1.2em; }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted); line-height: 1.65;
+      max-width: 520px; margin: 0 auto 2.5rem;
     }
-    .btn-gen:disabled { opacity: 0.55; cursor: not-allowed; }
 
-    /* ── Liste de courses ── */
-    .meal-chips { display: flex; gap: 8px; overflow-x: auto; padding: 0.5rem 1rem; scrollbar-width: none; }
-    .chip {
-      display: flex; align-items: center; gap: 5px; white-space: nowrap;
-      background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: 20px; padding: 6px 12px; font-size: 13px;
-      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero {
+      background: var(--green); color: #fff; border: none;
+      border-radius: var(--r); padding: 14px 28px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
     }
-    .chip.active { background: var(--green-light); border-color: var(--green-main); color: var(--green-dark); }
+    .btn-hero:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; color: var(--green);
+      border: 1.5px solid var(--green); border-radius: var(--r);
+      padding: 14px 28px; font-size: 15px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-ghost:hover { background: var(--green-pale); }
 
-    .stats-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 1rem; }
-    .stat-card   { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; }
-    .stat-label  { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-    .stat-val    { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .hero-note { margin-top: 1rem; font-size: 13px; color: var(--muted); }
 
-    .progress-wrap { padding: 0.75rem 1rem 0; }
-    .progress-bar  { height: 4px; background: var(--border); border-radius: 2px; }
-    .progress-fill { height: 4px; background: var(--green-main); border-radius: 2px; transition: width 0.3s; }
+    /* ── Pilliers ── */
+    .pillars {
+      max-width: 960px; margin: 0 auto;
+      padding: 1rem 1.5rem 5rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .pillar {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 1.75rem;
+    }
+    .pillar-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: var(--green-pale); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 1rem;
+    }
+    .pillar h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--ink);
+    }
+    .pillar p { font-size: 14px; color: var(--muted); line-height: 1.65; }
 
-    .cat-header {
+    /* ── Mockup ── */
+    .mockup-section {
+      background: var(--green-dark);
+      padding: 5rem 1.5rem;
+      text-align: center;
+    }
+    .mockup-section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: #fff; margin-bottom: 0.75rem;
+    }
+    .mockup-section h2 em { font-style: italic; color: var(--green-mid); }
+    .mockup-section p { color: rgba(255,255,255,0.65); font-size: 15px; margin-bottom: 3rem; }
+
+    .phone-frame {
+      display: inline-block;
+      background: #111;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      max-width: 300px;
+      width: 100%;
+    }
+    .phone-screen {
+      background: #F7F9F4;
+      border-radius: 30px;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+    .phone-statusbar {
+      background: #3B6D11; height: 36px;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.9rem 1rem 0.35rem;
+      padding: 0 16px; font-size: 11px; color: rgba(255,255,255,0.8);
     }
-    .cat-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .cat-count { font-size: 11px; background: var(--bg); border-radius: 10px; padding: 2px 8px; color: var(--text-muted); }
+    .phone-hero-card {
+      background: #3B6D11; margin: 12px; border-radius: 16px; padding: 16px;
+    }
+    .phone-tag { font-size: 10px; color: #C0DD97; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 2px 8px; display: inline-block; margin-bottom: 6px; }
+    .phone-recipe-title { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.3; margin-bottom: 8px; }
+    .phone-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .phone-pill { font-size: 10px; color: #EAF3DE; background: rgba(255,255,255,0.14); border-radius: 20px; padding: 3px 8px; }
+    .phone-btn { background: #fff; color: #3B6D11; border: none; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 600; width: 100%; }
 
-    .item-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 1rem; border-bottom: 0.5px solid var(--border);
-      cursor: pointer;
+    .phone-list-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+      font-size: 12px;
     }
-    .item-row:active { background: var(--bg); }
-    .check-circle {
-      width: 20px; height: 20px; border-radius: 50%;
-      border: 1.5px solid #ccc; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; transition: all 0.15s;
-    }
-    .check-circle.done { background: var(--green-main); border-color: var(--green-main); color: #fff; }
-    .item-name   { font-size: 14px; flex: 1; }
-    .item-name.done { text-decoration: line-through; color: var(--text-muted); }
-    .item-qty    { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .item-badge  { font-size: 11px; font-weight: 600; border-radius: 10px; padding: 2px 8px; }
-    .badge-green  { background: var(--green-light);  color: var(--green-dark); }
-    .badge-amber  { background: var(--amber-light);  color: var(--amber-dark); }
-    .badge-blue   { background: #E6F1FB; color: #0C447C; }
-    .badge-gray   { background: #F1EFE8; color: #444441; }
-    .badge-teal   { background: #E1F5EE; color: #085041; }
-    .badge-pink   { background: #FBEAF0; color: #72243E; }
+    .phone-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #ccc; flex-shrink: 0; }
+    .phone-check.done { background: #3B6D11; border-color: #3B6D11; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; }
+    .phone-item-label { flex: 1; }
+    .phone-item-qty { font-size: 10px; color: #666; }
+    .phone-badge-sm { font-size: 9px; background: #EAF3DE; color: #27500A; border-radius: 8px; padding: 1px 6px; font-weight: 600; }
+    .phone-section-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 16px 4px; }
 
-    .btn-add-ai {
-      margin: 1rem 1rem 0; background: var(--green-light); color: var(--green-dark);
-      border: 0.5px solid var(--green-main); border-radius: var(--radius-md);
-      padding: 10px 16px; font-size: 13px; font-weight: 600;
-      cursor: pointer; width: calc(100% - 2rem); display: flex;
-      align-items: center; justify-content: center; gap: 6px;
+    /* ── Prix ── */
+    .pricing {
+      padding: 5rem 1.5rem;
+      text-align: center;
+      max-width: 540px;
+      margin: 0 auto;
     }
-    .btn-add-ai:disabled { opacity: 0.55; cursor: not-allowed; }
+    .pricing h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      margin-bottom: 0.5rem;
+    }
+    .pricing h2 em { font-style: italic; color: var(--green); }
+    .pricing-sub { color: var(--muted); font-size: 15px; margin-bottom: 2.5rem; }
+
+    .price-card {
+      background: var(--white); border: 2px solid var(--green);
+      border-radius: 20px; padding: 2.5rem 2rem;
+      position: relative;
+    }
+    .price-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--amber); color: #fff;
+      font-size: 12px; font-weight: 700; border-radius: 20px;
+      padding: 4px 16px; white-space: nowrap; letter-spacing: 0.04em;
+    }
+    .price-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 4rem; color: var(--ink); line-height: 1;
+    }
+    .price-amount sup { font-size: 1.5rem; vertical-align: super; }
+    .price-once { font-size: 14px; color: var(--muted); margin-bottom: 1.75rem; margin-top: 4px; }
+
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px; color: var(--ink);
+    }
+    .price-features li:last-child { border-bottom: none; }
+    .check-icon { color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    .btn-buy {
+      background: var(--green); color: #fff; border: none;
+      border-radius: var(--r); padding: 15px 32px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; width: 100%;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-buy:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+    .price-reassurance { font-size: 12px; color: var(--muted); margin-top: 1rem; }
+
+    .free-note {
+      margin-top: 1.5rem; padding: 1rem 1.25rem;
+      background: var(--green-pale); border-radius: var(--r);
+      font-size: 14px; color: var(--green-dark);
+      border: 1px solid var(--green-mid);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--green); text-decoration: none; }
+    footer .footer-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: var(--green); margin-bottom: 0.5rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hero { padding: 3.5rem 1.25rem 3rem; }
+      .pillars { padding: 0.5rem 1.25rem 3.5rem; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .btn-hero, .btn-ghost { width: 100%; max-width: 320px; text-align: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rotating-inner, .hero-eyebrow span { animation: none; }
+    }
   </style>
 </head>
 <body>
-<div class="app">
 
-  <div class="topbar">
-    <div>
-      <div class="topbar-title">🌿 Veggie & Co</div>
-      <div class="topbar-sub">Menus végétariens · 5 ingrédients</div>
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">🌿 Veggie & Co</div>
+  <a href="#prix" class="nav-cta">Obtenir l'app</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span></span> Nouveauté — propulsé par IA
+  </div>
+
+  <h1>Cuisiner végétarien,<br><em>enfin</em> sans effort.</h1>
+
+  <div class="hero-rotating" aria-label="IA · 5 ingrédients · Liste auto">
+    <div class="rotating-inner">
+      <span>Idées IA infinies.</span>
+      <span>5 ingrédients max.</span>
+      <span>Liste auto-générée.</span>
     </div>
   </div>
 
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showTab('menus')">Menus</button>
-    <button class="nav-tab" onclick="showTab('courses')">Courses</button>
+  <p class="hero-sub">
+    Veggie & Co génère des recettes végétariennes originales, organise ta liste de courses par rayon, et te surprend chaque jour avec de nouvelles idées — le tout en quelques secondes.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#prix" class="btn-hero">Essayer gratuitement</a>
+    <a href="#fonctionnalites" class="btn-ghost">Voir comment ça marche</a>
   </div>
+  <p class="hero-note">3 recettes offertes · Aucune carte bancaire requise</p>
+</section>
 
-  <!-- ═══ ONGLET MENUS ═══ -->
-  <div class="section active" id="tab-menus">
+<!-- Pilliers -->
+<section class="pillars" id="fonctionnalites">
+  <div class="pillar">
+    <div class="pillar-icon">✨</div>
+    <h3>Recettes générées par IA</h3>
+    <p>Un bouton, une idée nouvelle. L'IA propose des plats végétariens originaux adaptés à ta saison, ton humeur, et ton placard.</p>
+  </div>
+  <div class="pillar">
+    <div class="pillar-icon">🥕</div>
+    <h3>Toujours 5 ingrédients</h3>
+    <p>Pas de longues listes qui intimident. Chaque recette tient en 5 ingrédients courants — accessibles en supermarché, réalisables en semaine.</p>
+  </div>
+  <div class="pillar">
+    <div class="pillar-icon">🛒</div>
+    <h3>Liste de courses automatique</h3>
+    <p>Sélectionne tes recettes de la semaine. La liste se compose toute seule, triée par rayon, sans doublons. Coche au fur et à mesure.</p>
+  </div>
+</section>
 
-    <div class="section-label">Plat du jour</div>
+<!-- Mockup -->
+<section class="mockup-section">
+  <h2>Tout tient dans<br><em>ton téléphone.</em></h2>
+  <p>Installe-la comme une vraie app, sans passer par l'App Store.</p>
 
-    <div class="hero-card">
-      <div class="hero-tag">⏱ 20 min</div>
-      <div class="hero-title">Curry de pois chiches<br>à la noix de coco</div>
-      <div class="hero-desc">Crémeux, épicé et rassasiant — un classique prêt en un tour de main.</div>
-      <div class="ing-row">
-        <span class="ing-pill">Pois chiches</span>
-        <span class="ing-pill">Lait de coco</span>
-        <span class="ing-pill">Tomates</span>
-        <span class="ing-pill">Épinards</span>
-        <span class="ing-pill">Curry</span>
+  <div class="phone-frame">
+    <div class="phone-screen">
+      <div class="phone-statusbar">
+        <span>9:41</span>
+        <span>🌿 Veggie & Co</span>
+        <span>●●●</span>
       </div>
-      <div class="hero-actions">
-        <button class="btn-primary" onclick="toggleRecipe()">Voir la recette</button>
-        <button class="btn-icon" onclick="generateIdea()">↻</button>
+
+      <div style="display:flex;border-bottom:1px solid rgba(0,0,0,0.08);">
+        <div style="flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;color:#3B6D11;border-bottom:2px solid #3B6D11;">Menus</div>
+        <div style="flex:1;padding:10px;text-align:center;font-size:12px;color:#888;">Courses</div>
       </div>
-    </div>
 
-    <div class="recipe-panel" id="recipePanel">
-      <h3>Préparation</h3>
-      <ol class="steps">
-        <li><span class="step-num">1</span>Faire revenir l'oignon émincé dans un filet d'huile 3 minutes.</li>
-        <li><span class="step-num">2</span>Ajouter le curry, faire revenir 30 secondes pour libérer les arômes.</li>
-        <li><span class="step-num">3</span>Incorporer les tomates concassées, mijoter 5 minutes.</li>
-        <li><span class="step-num">4</span>Verser le lait de coco et les pois chiches égouttés. Cuire 10 min.</li>
-        <li><span class="step-num">5</span>Ajouter les épinards, couvrir 2 min. Servir avec du riz basmati.</li>
-      </ol>
-    </div>
+      <div style="padding:10px 12px 4px;font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;">Plat du jour</div>
 
-    <div class="section-label">Suggestions rapides</div>
-
-    <div class="quick-grid">
-      <div class="quick-card"><div class="quick-icon">🥗</div><div class="quick-name">Buddha bowl quinoa & avocat</div><span class="quick-time">15 min</span></div>
-      <div class="quick-card"><div class="quick-icon">🌮</div><div class="quick-name">Tacos de lentilles épicées</div><span class="quick-time">25 min</span></div>
-      <div class="quick-card"><div class="quick-icon">🍜</div><div class="quick-name">Soupe miso & tofu soyeux</div><span class="quick-time">10 min</span></div>
-      <div class="quick-card"><div class="quick-icon">🧀</div><div class="quick-name">Gratin courgettes ricotta</div><span class="quick-time">35 min</span></div>
-    </div>
-
-    <div class="ai-block">
-      <h3>✨ Nouvelle idée IA</h3>
-      <p>Génère un plat végétarien original avec 5 ingrédients simples.</p>
-      <div class="ai-output" id="aiOutput">Appuie sur le bouton pour découvrir une nouvelle recette !</div>
-      <button class="btn-gen" id="aiBtn" onclick="generateIdea()">Générer une idée</button>
-    </div>
-
-  </div>
-
-  <!-- ═══ ONGLET COURSES ═══ -->
-  <div class="section" id="tab-courses">
-
-    <div class="section-label">Recettes sélectionnées</div>
-    <div class="meal-chips" id="mealChips"></div>
-
-    <div class="stats-grid" style="margin-top:0.75rem;">
-      <div class="stat-card"><div class="stat-label">Articles</div><div class="stat-val" id="statTotal">0</div></div>
-      <div class="stat-card"><div class="stat-label">Cochés</div><div class="stat-val" id="statDone">0</div></div>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-    </div>
-
-    <div id="listContainer"></div>
-
-    <button class="btn-add-ai" id="addAiBtn" onclick="generateAndAdd()">✨ Générer une recette & l'ajouter</button>
-  </div>
-
-</div>
-
-<script>
-// ─── Données ───────────────────────────────────────────────────────────────
-const MEALS = [
-  { id:'curry', name:'Curry coco', items:[
-    {name:'Pois chiches (boîte)',qty:'1 boîte 400g',cat:'conserves'},
-    {name:'Lait de coco',qty:'1 boîte 400ml',cat:'conserves'},
-    {name:'Tomates concassées',qty:'1 boîte 400g',cat:'conserves'},
-    {name:'Épinards frais',qty:'100g',cat:'legumes'},
-    {name:'Curry en poudre',qty:'2 c. à café',cat:'epicerie'}
-  ]},
-  { id:'buddha', name:'Buddha bowl', items:[
-    {name:'Quinoa',qty:'150g',cat:'feculents'},
-    {name:'Avocat',qty:'1',cat:'legumes'},
-    {name:'Concombre',qty:'½',cat:'legumes'},
-    {name:'Carottes',qty:'2',cat:'legumes'},
-    {name:'Sauce tahini',qty:'2 c. à soupe',cat:'epicerie'}
-  ]},
-  { id:'tacos', name:'Tacos lentilles', items:[
-    {name:'Lentilles vertes',qty:'200g',cat:'feculents'},
-    {name:'Tortillas de maïs',qty:'6',cat:'feculents'},
-    {name:'Poivrons rouges',qty:'2',cat:'legumes'},
-    {name:'Crème fraîche',qty:'100ml',cat:'laitiers'},
-    {name:'Cumin moulu',qty:'1 c. à café',cat:'epicerie'}
-  ]},
-  { id:'miso', name:'Soupe miso', items:[
-    {name:'Tofu soyeux',qty:'200g',cat:'frais'},
-    {name:'Pâte miso',qty:'2 c. à soupe',cat:'epicerie'},
-    {name:'Algues wakamé',qty:'10g',cat:'epicerie'},
-    {name:'Oignons verts',qty:'3',cat:'legumes'},
-    {name:'Bouillon légumes',qty:'800ml',cat:'conserves'}
-  ]}
-];
-
-const CAT_LABELS = {
-  legumes:'Fruits & légumes', frais:'Frais & tofu', laitiers:'Produits frais',
-  feculents:'Féculents & céréales', conserves:'Conserves', epicerie:'Épicerie'
-};
-const CAT_ORDER = ['legumes','frais','laitiers','feculents','conserves','epicerie'];
-const CAT_BADGE = {
-  legumes:'badge-green', frais:'badge-teal', laitiers:'badge-pink',
-  feculents:'badge-amber', conserves:'badge-blue', epicerie:'badge-gray'
-};
-const MOODS = ['printanier','estival','automnal','hivernal','méditerranéen','asiatique','mexicain','fusion'];
-
-let selectedMeals = new Set(['curry','buddha']);
-let checkedItems   = new Set();
-
-// ─── Onglets ───────────────────────────────────────────────────────────────
-function showTab(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
-  if (id === 'courses') renderCourses();
-}
-
-// ─── Onglet Menus ──────────────────────────────────────────────────────────
-function toggleRecipe() {
-  document.getElementById('recipePanel').classList.toggle('open');
-}
-
-async function generateIdea() {
-  const btn = document.getElementById('aiBtn');
-  const out = document.getElementById('aiOutput');
-  btn.disabled = true;
-  out.className = 'ai-output loading';
-  out.textContent = 'Inspiration en cours…';
-  const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content:
-          `Propose une idée de plat végétarien original avec exactement 5 ingrédients courants, d'inspiration ${mood}.
-Réponds en 3 lignes dans ce format exact :
-🍽 Nom du plat
-🥕 Ingrédient 1 · Ingrédient 2 · Ingrédient 3 · Ingrédient 4 · Ingrédient 5
-✨ Une phrase qui donne envie (max 15 mots).
-Aucune introduction, aucun autre texte.` }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.map(b => b.text || '').join('') || 'Erreur.';
-    out.className = 'ai-output';
-    out.innerHTML = text.replace(/\n/g, '<br>');
-  } catch {
-    out.className = 'ai-output';
-    out.textContent = 'Impossible de contacter l\'IA. Vérifie ta connexion.';
-  }
-  btn.disabled = false;
-}
-
-// ─── Onglet Courses ────────────────────────────────────────────────────────
-function getMergedItems() {
-  const map = {};
-  MEALS.forEach(meal => {
-    if (!selectedMeals.has(meal.id)) return;
-    meal.items.forEach(item => {
-      const key = item.name.toLowerCase();
-      if (!map[key]) map[key] = { ...item, meals: [] };
-      map[key].meals.push(meal.name);
-    });
-  });
-  return Object.values(map);
-}
-
-function renderCourses() {
-  // Chips
-  const chips = document.getElementById('mealChips');
-  chips.innerHTML = MEALS.map(m => `
-    <div class="chip ${selectedMeals.has(m.id) ? 'active' : ''}" onclick="toggleMeal('${m.id}')">
-      ${m.name}
-    </div>`).join('');
-
-  // Liste
-  const items = getMergedItems();
-  const grouped = {};
-  items.forEach(i => { if (!grouped[i.cat]) grouped[i.cat] = []; grouped[i.cat].push(i); });
-
-  let html = '';
-  CAT_ORDER.forEach(cat => {
-    if (!grouped[cat]) return;
-    html += `<div class="cat-header">
-      <span class="cat-title">${CAT_LABELS[cat]}</span>
-      <span class="cat-count">${grouped[cat].length}</span>
-    </div>`;
-    grouped[cat].forEach(item => {
-      const key = item.name.toLowerCase();
-      const done = checkedItems.has(key);
-      html += `<div class="item-row" onclick="toggleItem('${key}')">
-        <div class="check-circle ${done ? 'done' : ''}">${done ? '✓' : ''}</div>
-        <div style="flex:1">
-          <div class="item-name ${done ? 'done' : ''}">${item.name}</div>
-          <div class="item-qty">${item.qty}${item.meals.length > 1 ? ' · ' + item.meals.join(', ') : ''}</div>
+      <div class="phone-hero-card">
+        <div class="phone-tag">⏱ 20 min</div>
+        <div class="phone-recipe-title">Curry de pois chiches<br>à la noix de coco</div>
+        <div class="phone-pills">
+          <span class="phone-pill">Pois chiches</span>
+          <span class="phone-pill">Lait de coco</span>
+          <span class="phone-pill">Épinards</span>
         </div>
-        <span class="item-badge ${CAT_BADGE[item.cat] || 'badge-gray'}">${CAT_LABELS[item.cat]?.split(' ')[0]}</span>
-      </div>`;
-    });
-  });
+        <button class="phone-btn">Voir la recette</button>
+      </div>
 
-  document.getElementById('listContainer').innerHTML = html || '<div style="padding:2rem 1rem;text-align:center;color:#999;font-size:13px;">Sélectionne au moins une recette</div>';
-  updateStats(items.length);
-}
+      <div class="phone-section-label">Liste de courses</div>
 
-function toggleMeal(id) {
-  if (selectedMeals.has(id)) { if (selectedMeals.size > 1) selectedMeals.delete(id); }
-  else selectedMeals.add(id);
-  renderCourses();
-}
+      <div class="phone-list-item">
+        <div class="phone-check done">✓</div>
+        <div class="phone-item-label">Pois chiches<div class="phone-item-qty">1 boîte 400g</div></div>
+        <span class="phone-badge-sm">Conserves</span>
+      </div>
+      <div class="phone-list-item">
+        <div class="phone-check done">✓</div>
+        <div class="phone-item-label">Épinards frais<div class="phone-item-qty">100g</div></div>
+        <span class="phone-badge-sm" style="background:#EAF3DE;color:#27500A;">Légumes</span>
+      </div>
+      <div class="phone-list-item">
+        <div class="phone-check"></div>
+        <div class="phone-item-label">Lait de coco<div class="phone-item-qty">1 boîte 400ml</div></div>
+        <span class="phone-badge-sm">Conserves</span>
+      </div>
+      <div class="phone-list-item">
+        <div class="phone-check"></div>
+        <div class="phone-item-label">Curry en poudre<div class="phone-item-qty">2 c. à café</div></div>
+        <span class="phone-badge-sm" style="background:#F1EFE8;color:#444441;">Épicerie</span>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+</section>
 
-function toggleItem(key) {
-  if (checkedItems.has(key)) checkedItems.delete(key);
-  else checkedItems.add(key);
-  renderCourses();
-}
+<!-- Prix -->
+<section class="pricing" id="prix">
+  <h2>Un prix unique.<br><em>Pour toujours.</em></h2>
+  <p class="pricing-sub">Pas d'abonnement, pas de surprise. Tu paies une fois, tu accèdes à tout.</p>
 
-function updateStats(total) {
-  const done = [...getMergedItems()].filter(i => checkedItems.has(i.name.toLowerCase())).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statDone').textContent  = done;
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-}
+  <div class="price-card">
+    <div class="price-badge">⭐ Accès complet à vie</div>
 
-async function generateAndAdd() {
-  const btn = document.getElementById('addAiBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Génération en cours…';
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6', max_tokens: 1000,
-        messages: [{ role: 'user', content:
-          `Invente une recette végétarienne originale avec exactement 5 ingrédients.
-Réponds UNIQUEMENT en JSON valide, sans markdown :
-{"name":"Nom du plat","items":[{"name":"Ingrédient","qty":"quantité","cat":"legumes|feculents|conserves|laitiers|epicerie|frais"}]}` }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.map(b => b.text || '').join('').replace(/```json|```/g,'').trim();
-    const recipe = JSON.parse(text);
-    MEALS.push({ id: 'ai_' + Date.now(), name: recipe.name, items: recipe.items });
-    selectedMeals.add(MEALS[MEALS.length - 1].id);
-    renderCourses();
-  } catch {
-    alert('Erreur lors de la génération. Réessaie.');
+    <div class="price-amount"><sup>€</sup>4<span style="font-size:2rem;">,99</span></div>
+    <div class="price-once">paiement unique · aucun abonnement</div>
+
+    <ul class="price-features">
+      <li><span class="check-icon">✓</span> Recettes illimitées générées par IA</li>
+      <li><span class="check-icon">✓</span> Liste de courses automatique</li>
+      <li><span class="check-icon">✓</span> Fonctionne hors-ligne</li>
+      <li><span class="check-icon">✓</span> Toutes les futures recettes incluses</li>
+      <li><span class="check-icon">✓</span> Installez-la sur iOS & Android</li>
+    </ul>
+
+    <button class="btn-buy" onclick="alert('Intègre ici ton lien Stripe ou Lemon Squeezy !')">
+      Obtenir Veggie & Co — 4,99 €
+    </button>
+    <p class="price-reassurance">Satisfait ou remboursé sous 14 jours</p>
+  </div>
+
+  <div class="free-note">
+    🎁 Envie de tester d'abord ? Les 3 premières recettes sont entièrement gratuites, sans compte.
+  </div>
+</section>
+
+
+  <!-- Newsletter -->
+  <section style="background:#3B6D11;padding:4rem 1.5rem;text-align:center">
+    <div style="max-width:520px;margin:0 auto">
+      <div style="font-size:2rem;margin-bottom:.5rem">📖</div>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);color:#fff;margin-bottom:.5rem">
+        Reçois <em style="font-style:italic;color:#C0DD97">10 recettes offertes</em>
+      </h2>
+      <p style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:1.75rem;line-height:1.6">
+        Un ebook PDF gratuit avec nos 10 meilleures recettes végétariennes — chacune avec son surnom poétique et 5 ingrédients seulement.
+      </p>
+      <div style="display:flex;gap:8px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center">
+        <input type="email" id="emailInput" placeholder="votre@email.com"
+          style="flex:1;min-width:200px;padding:12px 16px;border-radius:10px;border:none;font-size:14px;font-family:'Inter',sans-serif;outline:none"/>
+        <button onclick="subscribe()"
+          style="background:#E8A020;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">
+          Recevoir l'ebook gratuit
+        </button>
+      </div>
+      <div id="formMsg" style="margin-top:.75rem;font-size:13px;color:#C0DD97;min-height:20px"></div>
+      <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:1rem">
+        Aucun spam · Désinscription en un clic · Conforme RGPD
+      </p>
+    </div>
+  </section>
+
+  <script>
+  function subscribe() {
+    const email = document.getElementById('emailInput').value.trim();
+    const msg = document.getElementById('formMsg');
+    if (!email || !email.includes('@')) {
+      msg.style.color = '#FAC775';
+      msg.textContent = 'Merci de saisir une adresse email valide.';
+      return;
+    }
+    msg.style.color = '#C0DD97';
+    msg.textContent = '✓ Merci ! Vérifie ta boîte mail pour recevoir ton ebook.';
+    document.getElementById('emailInput').value = '';
+    // Remplace l'URL ci-dessous par ton lien Brevo ou Mailchimp
+    // window.location.href = 'https://ton-lien-brevo.com?email=' + encodeURIComponent(email);
   }
-  btn.disabled = false;
-  btn.innerHTML = '✨ Générer une recette & l\'ajouter';
-}
+  </script>
 
-// ─── Service Worker ────────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .catch(err => console.warn('SW non enregistré :', err));
-}
-</script>
+  <!-- Footer -->
+<footer>
+  <div class="footer-logo">🌿 Veggie & Co</div>
+  <p>Cuisine végétarienne · Générée par IA · 5 ingrédients</p>
+  <p style="margin-top:0.5rem;">
+    <a href="#">Mentions légales</a> · <a href="#">Contact</a> · <a href="#">YouTube</a>
+  </p>
+</footer>
+
 </body>
 </html>
