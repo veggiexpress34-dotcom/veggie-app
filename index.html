@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veggie & Co</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#3B6D11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Veggie & Co" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:   #27500A;
+      --green-main:   #3B6D11;
+      --green-light:  #EAF3DE;
+      --green-mid:    #C0DD97;
+      --amber-light:  #FAEEDA;
+      --amber-dark:   #633806;
+      --text-primary: #1a1a1a;
+      --text-muted:   #666;
+      --border:       rgba(0,0,0,0.08);
+      --surface:      #fff;
+      --bg:           #f5f7f2;
+      --radius-md:    10px;
+      --radius-lg:    16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100dvh;
+    }
+
+    .app { max-width: 430px; margin: 0 auto; padding-bottom: 5rem; }
+
+    /* ── Header ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 1.1rem 1rem 0.9rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-title { font-size: 20px; font-weight: 600; color: var(--green-main); }
+    .topbar-sub   { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ── Nav tabs ── */
+    .nav-tabs {
+      display: flex; background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-tab {
+      flex: 1; padding: 0.75rem 0; font-size: 13px; font-weight: 500;
+      color: var(--text-muted); border: none; background: none; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.15s;
+    }
+    .nav-tab.active { color: var(--green-main); border-bottom-color: var(--green-main); }
+
+    /* ── Sections ── */
+    .section { display: none; }
+    .section.active { display: block; }
+    .section-label {
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 1.25rem 1rem 0.5rem;
+    }
+
+    /* ── Hero card ── */
+    .hero-card {
+      margin: 0.75rem 1rem 0;
+      background: var(--green-main);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.15); border-radius: 20px;
+      padding: 3px 10px; font-size: 12px; color: var(--green-mid); margin-bottom: 8px;
+    }
+    .hero-title { font-size: 19px; font-weight: 600; color: #fff; line-height: 1.3; margin-bottom: 6px; }
+    .hero-desc  { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.5; margin-bottom: 14px; }
+    .ing-row    { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .ing-pill   {
+      background: rgba(255,255,255,0.14); border-radius: 20px;
+      padding: 4px 10px; font-size: 12px; color: var(--green-light);
+    }
+    .hero-actions { display: flex; gap: 8px; }
+    .btn-primary {
+      background: #fff; color: var(--green-main); border: none;
+      border-radius: var(--radius-md); padding: 9px 16px;
+      font-size: 13px; font-weight: 600; cursor: pointer; flex: 1;
+    }
+    .btn-icon {
+      background: rgba(255,255,255,0.14); color: #fff; border: none;
+      border-radius: var(--radius-md); padding: 9px 14px; font-size: 16px; cursor: pointer;
+    }
+
+    /* ── Recette dépliable ── */
+    .recipe-panel {
+      display: none; background: var(--surface);
+      margin: 0 1rem; border-radius: var(--radius-lg);
+      border: 0.5px solid var(--border); padding: 1.1rem;
+    }
+    .recipe-panel.open { display: block; }
+    .recipe-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+    .steps { list-style: none; }
+    .steps li {
+      display: flex; gap: 10px; padding: 8px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px; line-height: 1.5; color: var(--text-primary);
+    }
+    .steps li:last-child { border-bottom: none; }
+    .step-num {
+      min-width: 22px; height: 22px; border-radius: 50%;
+      background: var(--green-light); color: var(--green-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; flex-shrink: 0;
+    }
+
+    /* ── Grille rapide ── */
+    .quick-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; padding: 0.5rem 1rem 0; }
+    .quick-card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem; cursor: pointer;
+    }
+    .quick-icon { font-size: 20px; margin-bottom: 8px; }
+    .quick-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+    .quick-time { font-size: 11px; font-weight: 600; display: inline-block;
+      background: var(--green-light); color: var(--green-dark);
+      border-radius: 10px; padding: 2px 8px; }
+
+    /* ── Bloc IA ── */
+    .ai-block {
+      margin: 1rem 1rem 0;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem;
+    }
+    .ai-block h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .ai-block p  { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+    .ai-output   { font-size: 14px; line-height: 1.65; min-height: 48px; margin-bottom: 14px; }
+    .ai-output.loading { color: var(--text-muted); font-style: italic; }
+    .btn-gen {
+      background: var(--green-main); color: #fff; border: none;
+      border-radius: var(--radius-md); padding: 10px 16px;
+      font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;
+    }
+    .btn-gen:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Liste de courses ── */
+    .meal-chips { display: flex; gap: 8px; overflow-x: auto; padding: 0.5rem 1rem; scrollbar-width: none; }
+    .chip {
+      display: flex; align-items: center; gap: 5px; white-space: nowrap;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 20px; padding: 6px 12px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .chip.active { background: var(--green-light); border-color: var(--green-main); color: var(--green-dark); }
+
+    .stats-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 1rem; }
+    .stat-card   { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; }
+    .stat-label  { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+    .stat-val    { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+
+    .progress-wrap { padding: 0.75rem 1rem 0; }
+    .progress-bar  { height: 4px; background: var(--border); border-radius: 2px; }
+    .progress-fill { height: 4px; background: var(--green-main); border-radius: 2px; transition: width 0.3s; }
+
+    .cat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1rem 0.35rem;
+    }
+    .cat-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .cat-count { font-size: 11px; background: var(--bg); border-radius: 10px; padding: 2px 8px; color: var(--text-muted); }
+
+    .item-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 1rem; border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+    }
+    .item-row:active { background: var(--bg); }
+    .check-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1.5px solid #ccc; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; transition: all 0.15s;
+    }
+    .check-circle.done { background: var(--green-main); border-color: var(--green-main); color: #fff; }
+    .item-name   { font-size: 14px; flex: 1; }
+    .item-name.done { text-decoration: line-through; color: var(--text-muted); }
+    .item-qty    { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .item-badge  { font-size: 11px; font-weight: 600; border-radius: 10px; padding: 2px 8px; }
+    .badge-green  { background: var(--green-light);  color: var(--green-dark); }
+    .badge-amber  { background: var(--amber-light);  color: var(--amber-dark); }
+    .badge-blue   { background: #E6F1FB; color: #0C447C; }
+    .badge-gray   { background: #F1EFE8; color: #444441; }
+    .badge-teal   { background: #E1F5EE; color: #085041; }
+    .badge-pink   { background: #FBEAF0; color: #72243E; }
+
+    .btn-add-ai {
+      margin: 1rem 1rem 0; background: var(--green-light); color: var(--green-dark);
+      border: 0.5px solid var(--green-main); border-radius: var(--radius-md);
+      padding: 10px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; width: calc(100% - 2rem); display: flex;
+      align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-add-ai:disabled { opacity: 0.55; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🌿 Veggie & Co</div>
+      <div class="topbar-sub">Menus végétariens · 5 ingrédients</div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('menus')">Menus</button>
+    <button class="nav-tab" onclick="showTab('courses')">Courses</button>
+  </div>
+
+  <!-- ═══ ONGLET MENUS ═══ -->
+  <div class="section active" id="tab-menus">
+
+    <div class="section-label">Plat du jour</div>
+
+    <div class="hero-card">
+      <div class="hero-tag">⏱ 20 min</div>
+      <div class="hero-title">Curry de pois chiches<br>à la noix de coco</div>
+      <div class="hero-desc">Crémeux, épicé et rassasiant — un classique prêt en un tour de main.</div>
+      <div class="ing-row">
+        <span class="ing-pill">Pois chiches</span>
+        <span class="ing-pill">Lait de coco</span>
+        <span class="ing-pill">Tomates</span>
+        <span class="ing-pill">Épinards</span>
+        <span class="ing-pill">Curry</span>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="toggleRecipe()">Voir la recette</button>
+        <button class="btn-icon" onclick="generateIdea()">↻</button>
+      </div>
+    </div>
+
+    <div class="recipe-panel" id="recipePanel">
+      <h3>Préparation</h3>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Faire revenir l'oignon émincé dans un filet d'huile 3 minutes.</li>
+        <li><span class="step-num">2</span>Ajouter le curry, faire revenir 30 secondes pour libérer les arômes.</li>
+        <li><span class="step-num">3</span>Incorporer les tomates concassées, mijoter 5 minutes.</li>
+        <li><span class="step-num">4</span>Verser le lait de coco et les pois chiches égouttés. Cuire 10 min.</li>
+        <li><span class="step-num">5</span>Ajouter les épinards, couvrir 2 min. Servir avec du riz basmati.</li>
+      </ol>
+    </div>
+
+    <div class="section-label">Suggestions rapides</div>
+
+    <div class="quick-grid">
+      <div class="quick-card"><div class="quick-icon">🥗</div><div class="quick-name">Buddha bowl quinoa & avocat</div><span class="quick-time">15 min</span></div>
+      <div class="quick-card"><div class="quick-icon">🌮</div><div class="quick-name">Tacos de lentilles épicées</div><span class="quick-time">25 min</span></div>
+      <div class="quick-card"><div class="quick-icon">🍜</div><div class="quick-name">Soupe miso & tofu soyeux</div><span class="quick-time">10 min</span></div>
+      <div class="quick-card"><div class="quick-icon">🧀</div><div class="quick-name">Gratin courgettes ricotta</div><span class="quick-time">35 min</span></div>
+    </div>
+
+    <div class="ai-block">
+      <h3>✨ Nouvelle idée IA</h3>
+      <p>Génère un plat végétarien original avec 5 ingrédients simples.</p>
+      <div class="ai-output" id="aiOutput">Appuie sur le bouton pour découvrir une nouvelle recette !</div>
+      <button class="btn-gen" id="aiBtn" onclick="generateIdea()">Générer une idée</button>
+    </div>
+
+  </div>
+
+  <!-- ═══ ONGLET COURSES ═══ -->
+  <div class="section" id="tab-courses">
+
+    <div class="section-label">Recettes sélectionnées</div>
+    <div class="meal-chips" id="mealChips"></div>
+
+    <div class="stats-grid" style="margin-top:0.75rem;">
+      <div class="stat-card"><div class="stat-label">Articles</div><div class="stat-val" id="statTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Cochés</div><div class="stat-val" id="statDone">0</div></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div id="listContainer"></div>
+
+    <button class="btn-add-ai" id="addAiBtn" onclick="generateAndAdd()">✨ Générer une recette & l'ajouter</button>
+  </div>
+
+</div>
+
+<script>
+// ─── Données ───────────────────────────────────────────────────────────────
+const MEALS = [
+  { id:'curry', name:'Curry coco', items:[
+    {name:'Pois chiches (boîte)',qty:'1 boîte 400g',cat:'conserves'},
+    {name:'Lait de coco',qty:'1 boîte 400ml',cat:'conserves'},
+    {name:'Tomates concassées',qty:'1 boîte 400g',cat:'conserves'},
+    {name:'Épinards frais',qty:'100g',cat:'legumes'},
+    {name:'Curry en poudre',qty:'2 c. à café',cat:'epicerie'}
+  ]},
+  { id:'buddha', name:'Buddha bowl', items:[
+    {name:'Quinoa',qty:'150g',cat:'feculents'},
+    {name:'Avocat',qty:'1',cat:'legumes'},
+    {name:'Concombre',qty:'½',cat:'legumes'},
+    {name:'Carottes',qty:'2',cat:'legumes'},
+    {name:'Sauce tahini',qty:'2 c. à soupe',cat:'epicerie'}
+  ]},
+  { id:'tacos', name:'Tacos lentilles', items:[
+    {name:'Lentilles vertes',qty:'200g',cat:'feculents'},
+    {name:'Tortillas de maïs',qty:'6',cat:'feculents'},
+    {name:'Poivrons rouges',qty:'2',cat:'legumes'},
+    {name:'Crème fraîche',qty:'100ml',cat:'laitiers'},
+    {name:'Cumin moulu',qty:'1 c. à café',cat:'epicerie'}
+  ]},
+  { id:'miso', name:'Soupe miso', items:[
+    {name:'Tofu soyeux',qty:'200g',cat:'frais'},
+    {name:'Pâte miso',qty:'2 c. à soupe',cat:'epicerie'},
+    {name:'Algues wakamé',qty:'10g',cat:'epicerie'},
+    {name:'Oignons verts',qty:'3',cat:'legumes'},
+    {name:'Bouillon légumes',qty:'800ml',cat:'conserves'}
+  ]}
+];
+
+const CAT_LABELS = {
+  legumes:'Fruits & légumes', frais:'Frais & tofu', laitiers:'Produits frais',
+  feculents:'Féculents & céréales', conserves:'Conserves', epicerie:'Épicerie'
+};
+const CAT_ORDER = ['legumes','frais','laitiers','feculents','conserves','epicerie'];
+const CAT_BADGE = {
+  legumes:'badge-green', frais:'badge-teal', laitiers:'badge-pink',
+  feculents:'badge-amber', conserves:'badge-blue', epicerie:'badge-gray'
+};
+const MOODS = ['printanier','estival','automnal','hivernal','méditerranéen','asiatique','mexicain','fusion'];
+
+let selectedMeals = new Set(['curry','buddha']);
+let checkedItems   = new Set();
+
+// ─── Onglets ───────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'courses') renderCourses();
+}
+
+// ─── Onglet Menus ──────────────────────────────────────────────────────────
+function toggleRecipe() {
+  document.getElementById('recipePanel').classList.toggle('open');
+}
+
+async function generateIdea() {
+  const btn = document.getElementById('aiBtn');
+  const out = document.getElementById('aiOutput');
+  btn.disabled = true;
+  out.className = 'ai-output loading';
+  out.textContent = 'Inspiration en cours…';
+  const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content:
+          `Propose une idée de plat végétarien original avec exactement 5 ingrédients courants, d'inspiration ${mood}.
+Réponds en 3 lignes dans ce format exact :
+🍽 Nom du plat
+🥕 Ingrédient 1 · Ingrédient 2 · Ingrédient 3 · Ingrédient 4 · Ingrédient 5
+✨ Une phrase qui donne envie (max 15 mots).
+Aucune introduction, aucun autre texte.` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Erreur.';
+    out.className = 'ai-output';
+    out.innerHTML = text.replace(/\n/g, '<br>');
+  } catch {
+    out.className = 'ai-output';
+    out.textContent = 'Impossible de contacter l\'IA. Vérifie ta connexion.';
+  }
+  btn.disabled = false;
+}
+
+// ─── Onglet Courses ────────────────────────────────────────────────────────
+function getMergedItems() {
+  const map = {};
+  MEALS.forEach(meal => {
+    if (!selectedMeals.has(meal.id)) return;
+    meal.items.forEach(item => {
+      const key = item.name.toLowerCase();
+      if (!map[key]) map[key] = { ...item, meals: [] };
+      map[key].meals.push(meal.name);
+    });
+  });
+  return Object.values(map);
+}
+
+function renderCourses() {
+  // Chips
+  const chips = document.getElementById('mealChips');
+  chips.innerHTML = MEALS.map(m => `
+    <div class="chip ${selectedMeals.has(m.id) ? 'active' : ''}" onclick="toggleMeal('${m.id}')">
+      ${m.name}
+    </div>`).join('');
+
+  // Liste
+  const items = getMergedItems();
+  const grouped = {};
+  items.forEach(i => { if (!grouped[i.cat]) grouped[i.cat] = []; grouped[i.cat].push(i); });
+
+  let html = '';
+  CAT_ORDER.forEach(cat => {
+    if (!grouped[cat]) return;
+    html += `<div class="cat-header">
+      <span class="cat-title">${CAT_LABELS[cat]}</span>
+      <span class="cat-count">${grouped[cat].length}</span>
+    </div>`;
+    grouped[cat].forEach(item => {
+      const key = item.name.toLowerCase();
+      const done = checkedItems.has(key);
+      html += `<div class="item-row" onclick="toggleItem('${key}')">
+        <div class="check-circle ${done ? 'done' : ''}">${done ? '✓' : ''}</div>
+        <div style="flex:1">
+          <div class="item-name ${done ? 'done' : ''}">${item.name}</div>
+          <div class="item-qty">${item.qty}${item.meals.length > 1 ? ' · ' + item.meals.join(', ') : ''}</div>
+        </div>
+        <span class="item-badge ${CAT_BADGE[item.cat] || 'badge-gray'}">${CAT_LABELS[item.cat]?.split(' ')[0]}</span>
+      </div>`;
+    });
+  });
+
+  document.getElementById('listContainer').innerHTML = html || '<div style="padding:2rem 1rem;text-align:center;color:#999;font-size:13px;">Sélectionne au moins une recette</div>';
+  updateStats(items.length);
+}
+
+function toggleMeal(id) {
+  if (selectedMeals.has(id)) { if (selectedMeals.size > 1) selectedMeals.delete(id); }
+  else selectedMeals.add(id);
+  renderCourses();
+}
+
+function toggleItem(key) {
+  if (checkedItems.has(key)) checkedItems.delete(key);
+  else checkedItems.add(key);
+  renderCourses();
+}
+
+function updateStats(total) {
+  const done = [...getMergedItems()].filter(i => checkedItems.has(i.name.toLowerCase())).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent  = done;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function generateAndAdd() {
+  const btn = document.getElementById('addAiBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération en cours…';
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6', max_tokens: 1000,
+        messages: [{ role: 'user', content:
+          `Invente une recette végétarienne originale avec exactement 5 ingrédients.
+Réponds UNIQUEMENT en JSON valide, sans markdown :
+{"name":"Nom du plat","items":[{"name":"Ingrédient","qty":"quantité","cat":"legumes|feculents|conserves|laitiers|epicerie|frais"}]}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('').replace(/```json|```/g,'').trim();
+    const recipe = JSON.parse(text);
+    MEALS.push({ id: 'ai_' + Date.now(), name: recipe.name, items: recipe.items });
+    selectedMeals.add(MEALS[MEALS.length - 1].id);
+    renderCourses();
+  } catch {
+    alert('Erreur lors de la génération. Réessaie.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '✨ Générer une recette & l\'ajouter';
+}
+
+// ─── Service Worker ────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .catch(err => console.warn('SW non enregistré :', err));
+}
+</script>
+</body>
+</html>
